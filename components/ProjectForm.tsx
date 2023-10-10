@@ -7,7 +7,7 @@ import FormField from "./FormField";
 import CustomMenu from "./CustomMenu";
 import { categoryFilters } from "@/constant";
 import Button from "./Button";
-import { createNewProject, fetchToken } from "@/lib/actions";
+import { createNewProject, fetchToken, updateProject } from "@/lib/actions";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -16,7 +16,7 @@ type Props = {
   project?: ProjectInterface;
 };
 
-const ProjectForm = ({ type, session }: Props) => {
+const ProjectForm = ({ type, session, project }: Props) => {
   const router = useRouter();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -32,8 +32,19 @@ const ProjectForm = ({ type, session }: Props) => {
 
         router.push("/");
       }
+      if (type === "edit") {
+        await updateProject(form, project?.id as string, token);
+
+        router.push("/");
+      }
     } catch (error) {
-      console.log(error);
+      alert(
+        `Failed to ${
+          type === "create" ? "create" : "edit"
+        } a project. Try again!`
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -67,12 +78,12 @@ const ProjectForm = ({ type, session }: Props) => {
   const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    image: "",
-    liveSiteUrl: "",
-    githubUrl: "",
-    category: "",
+    title: project?.title || "",
+    description: project?.description || "",
+    image: project?.image || "",
+    liveSiteUrl: project?.liveSiteUrl || "",
+    githubUrl: project?.githubUrl || "",
+    category: project?.category || "",
   });
 
   return (
